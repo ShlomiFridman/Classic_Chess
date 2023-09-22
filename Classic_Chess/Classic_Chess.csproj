@@ -1,0 +1,45 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <ApplicationIcon />
+    <Win32Resource />
+    <AssemblyName>Classic_Chess</AssemblyName>
+    <RootNamespace>Classic_Chess</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="assets\icon.png" />
+    <None Remove="assets\pieces\black_bishop.png" />
+    <None Remove="assets\pieces\black_king.png" />
+    <None Remove="assets\pieces\black_knight.png" />
+    <None Remove="assets\pieces\black_pawn.png" />
+    <None Remove="assets\pieces\black_queen.png" />
+    <None Remove="assets\pieces\black_rook.png" />
+    <None Remove="assets\pieces\white_bishop.png" />
+    <None Remove="assets\pieces\white_king.png" />
+    <None Remove="assets\pieces\white_knight.png" />
+    <None Remove="assets\pieces\white_pawn.png" />
+    <None Remove="assets\pieces\white_queen.png" />
+    <None Remove="assets\pieces\white_rook.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="assets\icon.png" />
+    <Resource Include="assets\pieces\Black_Bishop.png" />
+    <Resource Include="assets\pieces\Black_King.png" />
+    <Resource Include="assets\pieces\Black_Knight.png" />
+    <Resource Include="assets\pieces\Black_Pawn.png" />
+    <Resource Include="assets\pieces\Black_Queen.png" />
+    <Resource Include="assets\pieces\Black_Rook.png" />
+    <Resource Include="assets\pieces\White_Bishop.png" />
+    <Resource Include="assets\pieces\White_King.png" />
+    <Resource Include="assets\pieces\White_Knight.png" />
+    <Resource Include="assets\pieces\White_Pawn.png" />
+    <Resource Include="assets\pieces\White_Queen.png" />
+    <Resource Include="assets\pieces\White_Rook.png" />
+  </ItemGroup>
+
+</Project>
