@@ -35,7 +35,7 @@ namespace Classic_Chess.MyClasses
                 return null;
         }
 
-        public bool makeMove(Move move)
+        public bool makeMove(Move move, bool isRedo)
         {
             var piece = getPieceAt(move.before);
             // if hasEnemy is true, remove enemy from active
@@ -45,8 +45,9 @@ namespace Classic_Chess.MyClasses
             this.movePiece(piece, move.after);
             // add move to history
             history.Push(move);
-            // clear future
-            future.Clear();
+            // clear future, if not a redo
+            if (!isRedo)
+                future.Clear();
             // get updated moves
             updateMoves();
             // made the move, return true
@@ -64,11 +65,11 @@ namespace Classic_Chess.MyClasses
             return true;
         }
 
-        public bool undo()
+        public Move undo()
         {
             // if the history is empty, return false
             if (history.Count == 0)
-                return false;
+                return null;
             // get move
             var move = history.Pop();
             var piece = getPieceAt(move.after);
@@ -81,17 +82,29 @@ namespace Classic_Chess.MyClasses
             future.Push(move);
             // update moves
             this.updateMoves();
-            // undone successfully, return true
-            return true;
+            // undone successfully, return the move
+            return move;
         }
 
-        public bool redo()
+        public bool haveUndo()
+        {
+            // if there are any moves to undo, return true (else false)
+            return this.history.Count != 0;
+        }
+
+        public Move getRedo()
         {
             // if future is empty, return false
             if (future.Count == 0)
-                return false;
-            // make the move, and return result
-            return this.makeMove(future.Pop());
+                return null;
+            // return redo move
+            return future.Pop(); ;
+        }
+
+        public bool haveRedo()
+        {
+            // if there are any moves to undo, return true (else false)
+            return this.future.Count != 0;
         }
 
         public void resetBoard()

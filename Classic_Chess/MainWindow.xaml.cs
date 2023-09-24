@@ -82,7 +82,7 @@ namespace Classic_Chess
                 move = selected.validMoves.Find((move) => move.after.Equals(pos));
                 // if move isn't null, than its a move
                 if (move != null)
-                    makeMove(move);
+                    makeMove(move, false);
                 // else show the moves of the position
                 else
                     showMoves(pos);
@@ -92,22 +92,18 @@ namespace Classic_Chess
                 showMoves(pos);
         }
 
-        private void makeMove(Move move)
+        private void makeMove(Move move, bool isRedo)
         {
-            var beforePanel = getPanel(move.before);
-            var afterPanel = getPanel(move.after);
             UIElement img;
             // make move on gameBoard
-            gameBoard.makeMove(move);
-            // if need be remove enemy image
-            if (move.enemy != null)
-               afterPanel.Children.Clear();
+            gameBoard.makeMove(move, isRedo);
             // move the piece image
-            img = beforePanel.Children[0];
-            beforePanel.Children.Clear();
-            afterPanel.Children.Add(img);
+            movePiece(move.before, move.after);
             // change turn
             ChangeTurn();
+            // change enabled status for the redo and undo buttons
+            UndoBtn.IsEnabled = true;
+            RedoBtn.IsEnabled = false;
             // check checkmate
             if (gameBoard.check_Checkmate(turn))
             {
@@ -183,6 +179,9 @@ namespace Classic_Chess
             turn = Color.White;
             turnText.Text = turn.ToString() + "'s turn";
             selected = null;
+            // change buttons status
+            UndoBtn.IsEnabled = false;
+            RedoBtn.IsEnabled = false;
         }
 
         private void ChangeTurn()
@@ -194,6 +193,63 @@ namespace Classic_Chess
             // delete info text if there is any
             if (infoText.Text.Length != 0)
                 infoText.Text = "";
+        }
+
+        private void movePiece(Coords from, Coords to)
+        {
+
+            var fromPanel = getPanel(from);
+            var toPanel = getPanel(to);
+            UIElement img;
+            // if need be remove enemy image
+            if (toPanel.Children.Count != 0)
+                toPanel.Children.Clear();
+            img = fromPanel.Children[0];
+            fromPanel.Children.Clear();
+            toPanel.Children.Add(img);
+        }
+
+        private void UndoBtn_Click(object sender, RoutedEventArgs e)
+        {
+            // if there is nothing to undo, show message and return
+            if (gameBoard.haveUndo() == false)
+            {
+                infoText.Text = "There are no moves to undo";
+                return;
+            }
+            // make the move, and get it from board
+            var move = gameBoard.undo();
+            // move the piece back
+            movePiece(move.after, move.before);
+            // if there was an enemy, readd its image
+            if (move.enemy != null)
+            {
+                getPanel(move.after).Children.Add(getImage(move.enemy));
+            }
+            // change turn back
+            ChangeTurn();
+            // enable redo button
+            RedoBtn.IsEnabled = true;
+            // check if need to disable undo button
+            if (gameBoard.haveUndo() == false)
+                UndoBtn.IsEnabled = false;
+        }
+
+        private void RedoBtn_Click(object sender, RoutedEventArgs e)
+        {
+            // if there is nothing to redo, show message and return
+            if (gameBoard.haveRedo() == false)
+            {
+                infoText.Text = "There are no moves to redo";
+                return;
+            }
+            // make the move on board, and get it
+            var move = gameBoard.getRedo();
+            // make the move on screen
+            this.makeMove(move, true);
+            // if there are more redos, re-enable the button
+            if (gameBoard.haveRedo() == true)
+                RedoBtn.IsEnabled = true;
         }
     }
 }

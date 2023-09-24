@@ -12,9 +12,15 @@
             <ColumnDefinition Width="2*"/>
             <ColumnDefinition Width="1*"/>
         </Grid.ColumnDefinitions>
-        <Grid x:Name="BoardGrid" Background="SaddleBrown" MinWidth="497" MinHeight="500" Grid.Column="0">
-        </Grid>
+        <Border BorderThickness="6" BorderBrush="DarkSlateGray" Margin="3">
+            <Grid x:Name="BoardGrid" Background="SaddleBrown" MinWidth="497" MinHeight="500" Grid.Column="0">
+            </Grid>
+        </Border>
         <StackPanel Orientation="Vertical" Grid.Column="1">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button x:Name="UndoBtn" Padding="3" Margin="7" Content="Undo" IsEnabled="False" Click="UndoBtn_Click"/>
+                <Button x:Name="RedoBtn" Padding="3" Margin="7" Content="Redo" IsEnabled="False" Click="RedoBtn_Click"/>
+            </StackPanel>
             <TextBlock x:Name="turnText" Margin="7" Width="100" TextAlignment="Center">White's turn</TextBlock>
             <TextBlock x:Name="infoText" Margin="7" Width="100" TextAlignment="Center"></TextBlock>
         </StackPanel>
