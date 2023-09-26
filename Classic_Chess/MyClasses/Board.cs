@@ -13,6 +13,8 @@ namespace Classic_Chess.MyClasses
         private List<ChessPiece> whitePieces;
         private List<ChessPiece> graveyard;
         private Stack<Move> history, future;
+        public Color turn;
+
 
         public Board()
         {
@@ -23,8 +25,13 @@ namespace Classic_Chess.MyClasses
             graveyard = new List<ChessPiece>();
             history = new Stack<Move>();
             future = new Stack<Move>();
-            // reset the board
-            resetBoard();
+        }
+
+        public static Board getSetBoard()
+        {
+            var board = new Board();
+            board.resetBoard();
+            return board;
         }
 
         public ChessPiece getPieceAt(Coords pos)
@@ -37,7 +44,7 @@ namespace Classic_Chess.MyClasses
 
         public bool makeMove(Move move, bool isRedo)
         {
-            var piece = getPieceAt(move.before);
+            var piece = move.piece;
             // if hasEnemy is true, remove enemy from active
             if (move.enemy != null)
                 this.removeFromActive(move.enemy);
@@ -72,7 +79,16 @@ namespace Classic_Chess.MyClasses
                 return null;
             // get move
             var move = history.Pop();
-            var piece = getPieceAt(move.after);
+            var piece = move.piece;
+            var pieceAt = getPieceAt(move.after);
+            // if its not the same piece, happens when a pawn is promoted
+            if (piece != pieceAt)
+            {
+                // change back
+                removeFromActive(pieceAt);
+                graveyard.Remove(pieceAt);
+                addToActive(piece);
+            }
             // move the piece to the old position
             this.movePiece(piece, move.before);
             // if had an enemy, revive him
@@ -161,21 +177,32 @@ namespace Classic_Chess.MyClasses
                 kv.Value.updateMoves(this);
         }
 
+        public bool needPromotion(ChessPiece piece)
+        {
+
+            // check conditions
+            if (piece.pos.y != 0 && piece.pos.y != 7)   // wrong row
+                return false;
+            if (piece == null || piece.type != Pieces.Type.Pawn)  // if there isn't a pawn at given position
+                return false;
+            if (piece.pos.y != (piece.color == Color.Black ? 7 : 0))   // if the color doesn't match the right row
+                return false;
+            // met conditions, return true
+            return true;
+        }
+
         public bool promotePawnAt(Coords pos, Pieces.Type promoteTo)
         {
-            // check conditions
-            if (pos.y != 0 && pos.y != 7)   // wrong row
-                return false;
             var pawn = getPieceAt(pos);
-            if (pawn == null || pawn.type != Pieces.Type.Pawn)  // if there isn't a pawn at given position
-                return false;
-            if (pos.y != (pawn.color == Color.Black ? 7 : 0))   // if the color doesn't match the right row
-                return false;
-            if (promoteTo == Pieces.Type.Pawn || promoteTo == Pieces.Type.King) // if the promoteTo type isn't right
+            // check conditions
+            if (!needPromotion(pawn))
                 return false;
             // every condition was met, promote the pawn
-            this.removeFromActive(pawn);    // remove the pawn
-            this.addToActive(ChessFactory.createPiece(promoteTo, pawn.color, pos)); // add promoted pawn
+            this.removeFromActive(pawn);
+            // remove from graveyard
+            this.graveyard.Remove(pawn);
+            // add promoted piece
+            this.addToActive(ChessFactory.createPiece(promoteTo, pawn.color, pos));
             return true;
         }
 
@@ -253,6 +280,89 @@ namespace Classic_Chess.MyClasses
         public Dictionary<Coords,ChessPiece> getActivePieces()
         {
             return this.activePieces;
+        }
+
+        public string getSaveData()
+        {
+            List<long> data = new List<long>();
+            // first add the turn 
+            data.Add((int) turn);
+            // add the data of all pieces (add to each piece a digit for if its active or not), there is always a total of 32 pieces
+            foreach (var kv in activePieces)
+                data.Add(kv.Value.getSaveValue()*10+1);
+            foreach (var val in graveyard)
+                data.Add(val.getSaveValue()*10);
+            // add the count of future moves, and the moves themselves
+            data.Add(future.Count);
+            foreach (var move in future)
+                data.Add(move.getSaveValue());
+            // add the count of history moves, and the moves themselves
+            data.Add(history.Count);
+            foreach (var move in history)
+                data.Add(move.getSaveValue());
+            // convert the list into a string, and return it
+            return string.Join(" ", data);
+        }
+
+        public static Board getFromSave(string data)
+        {
+            try
+            {
+                // convert data to int list, and init board
+                List<long> vals = new List<long>(Array.ConvertAll(data.Split(' '), long.Parse));
+                Board board = new Board();
+                ChessPiece piece;
+                int i = 1;
+                long count;
+                // get turn
+                board.turn = (Color)vals[0];
+                // get all pieces
+                for (; i <= 32; i++)
+                {
+                    piece = ChessFactory.createPiece(vals[i] / 10);
+                    // if the first digit is 1, add to active pieces, else add to graveyard
+                    if (vals[i] % 10 == 1)
+                        board.addToActive(piece);
+                    else
+                        board.graveyard.Add(piece);
+                }
+                // get the count of future moves
+                count = vals[i++];
+                // get all future moves
+                while (count>0)
+                {
+                    board.future.Push(Move.getFromSave(vals[i++]));
+                    count--;
+                }
+                // get the count of history moves
+                count = vals[i++];
+                // get all history moves
+                while (count > 0)
+                {
+                    board.history.Push(Move.getFromSave(vals[i++]));
+                    count--;
+                }
+                // reverse the stacks
+                revStack(board.future);
+                revStack(board.history);
+                // update moves
+                board.updateMoves();
+                // return the result
+                return board;
+            } catch (Exception e)
+            {
+                // if failed at any point, return null
+                return null;
+            }
+        }
+
+        private static void revStack(Stack<Move> st)
+        {
+            Queue<Move> qu = new Queue<Move>();
+            while (st.Count != 0)
+                qu.Enqueue(st.Pop());
+            while (qu.Count != 0)
+                st.Push(qu.Dequeue());
         }
     }
 }

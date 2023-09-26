@@ -14,7 +14,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using Color = Classic_Chess.MyClasses.Pieces.Color;
+using MyColor = Classic_Chess.MyClasses.Pieces.Color;
+using MyType = Classic_Chess.MyClasses.Pieces.Type;
 
 namespace Classic_Chess
 {
@@ -28,14 +29,12 @@ namespace Classic_Chess
 
         private ChessPiece selected;
 
-        private Color turn;  // true = white , false = black
-
         public MainWindow()
         {
             int i,j;
             // init game board
-            this.gameBoard = new Board();
-            this.turn = Color.White;
+            this.gameBoard = Board.getSetBoard();
+            this.gameBoard.turn = MyColor.White;
             // init window elements
             InitializeComponent();
             // build default grid
@@ -61,7 +60,7 @@ namespace Classic_Chess
                     stackPanel.Background = ((i + j) % 2 == 0)? Brushes.GhostWhite : Brushes.DarkGray;
                     stackPanel.Tag = pos;
                     stackPanel.MouseLeftButtonUp += panelMouseLeftButtonUp;
-                    stackPanel.Margin = new Thickness(3);
+                    stackPanel.Margin = new Thickness(1);
                     stackPanel.MinHeight = stackPanel.MinWidth = 50;
                     // if there is a piece there, add img
                     if (piece != null)
@@ -95,19 +94,49 @@ namespace Classic_Chess
         private void makeMove(Move move, bool isRedo)
         {
             UIElement img;
+            StackPanel panel;
+            var piece = move.piece;
+            MyType promotSelection;
             // make move on gameBoard
             gameBoard.makeMove(move, isRedo);
             // move the piece image
             movePiece(move.before, move.after);
             // change turn
-            ChangeTurn();
+            UpdateTurn();
             // change enabled status for the redo and undo buttons
             UndoBtn.IsEnabled = true;
             RedoBtn.IsEnabled = false;
-            // check checkmate
-            if (gameBoard.check_Checkmate(turn))
+            // if pawn, check if need promotion
+            if (gameBoard.needPromotion(piece))
             {
-                infoText.Text = ((turn == Color.White) ? Color.Black.ToString() : Color.White.ToString()) + " Wins";
+                // show dialog
+                var dialog = new PromotionDialog();
+                if (dialog.ShowDialog() == true)
+                {
+                    promotSelection = dialog.Selection;
+                    // TODO promote pawn
+                    // promote the pawn
+                    gameBoard.promotePawnAt(piece.pos, promotSelection);
+                    // get updated piece
+                    piece = gameBoard.getPieceAt(piece.pos);
+                    // update image
+                    panel = getPanel(piece.pos);
+                    // clear previous image
+                    panel.Children.Clear();
+                    // add new image
+                    panel.Children.Add(getImage(piece));
+                }
+                // if no option was selected, undo the move
+                else
+                {
+                    UndoBtn_Click(null, null);
+                    return;
+                }
+            }
+            // check checkmate
+            if (gameBoard.check_Checkmate(gameBoard.turn))
+            {
+                infoText.Text = ((gameBoard.turn == MyColor.White) ? MyColor.Black.ToString() : MyColor.White.ToString()) + " Wins";
                 resetBoard();
             }
         }
@@ -116,7 +145,7 @@ namespace Classic_Chess
         {
             // if there isn't a piece at given position, or if its the same piece, or wrong color for the turn, then null selected and return
             var piece = gameBoard.getPieceAt(pos);
-            if (piece == null || piece == selected || piece.color != turn)
+            if (piece == null || piece == selected || piece.color != gameBoard.turn)
             {
                 this.selected = null;
                 return;
@@ -176,19 +205,19 @@ namespace Classic_Chess
                 getPanel(kv.Key).Children.Add(getImage(kv.Value));
             }
             // reset turn flag and selected
-            turn = Color.White;
-            turnText.Text = turn.ToString() + "'s turn";
+            gameBoard.turn = MyColor.White;
+            turnText.Text = gameBoard.turn.ToString() + "'s turn";
             selected = null;
             // change buttons status
             UndoBtn.IsEnabled = false;
             RedoBtn.IsEnabled = false;
         }
 
-        private void ChangeTurn()
+        private void UpdateTurn()
         {
             // flip turn, update text, and null select
-            turn = turn == Color.White ? Color.Black : Color.White;
-            turnText.Text = turn.ToString() + "'s turn";
+            gameBoard.turn = gameBoard.turn == MyColor.White ? MyColor.Black : MyColor.White;
+            turnText.Text = gameBoard.turn.ToString() + "'s turn";
             selected = null;
             // delete info text if there is any
             if (infoText.Text.Length != 0)
@@ -217,17 +246,20 @@ namespace Classic_Chess
                 infoText.Text = "There are no moves to undo";
                 return;
             }
+            // hide shown moves
+            hideMoves();
             // make the move, and get it from board
             var move = gameBoard.undo();
-            // move the piece back
-            movePiece(move.after, move.before);
-            // if there was an enemy, readd its image
+            // update piece image and position
+            getPanel(move.after).Children.Clear();
+            getPanel(move.before).Children.Add(getImage(move.piece));
+            // if there was an enemy, re-add its image
             if (move.enemy != null)
             {
                 getPanel(move.after).Children.Add(getImage(move.enemy));
             }
             // change turn back
-            ChangeTurn();
+            UpdateTurn();
             // enable redo button
             RedoBtn.IsEnabled = true;
             // check if need to disable undo button
@@ -250,6 +282,43 @@ namespace Classic_Chess
             // if there are more redos, re-enable the button
             if (gameBoard.haveRedo() == true)
                 RedoBtn.IsEnabled = true;
+        }
+
+        private void saveBtn_Click(object sender, RoutedEventArgs e)
+        {
+            // create save data
+            string saveData = gameBoard.getSaveData();
+            // save the string data
+            Properties.Settings.Default.SaveData1 = saveData;
+            Properties.Settings.Default.Save();
+            // show message
+            infoText.Text = "Saved data";
+        }
+
+        private void loadBtn_Click(object sender, RoutedEventArgs e)
+        {
+            // save the old turn, for later use
+            MyColor oldTurn = gameBoard.turn;
+            // get save data
+            string data = Properties.Settings.Default.SaveData1;
+            // build the object
+            var saveData = Board.getFromSave(data);
+            // if the data is null, print message and return
+            if (saveData == null)
+            {
+                infoText.Text = "No save data";
+                return;
+            }
+            // clear the board and load the save
+            foreach (var kv in gameBoard.getActivePieces())
+                getPanel(kv.Key).Children.Clear();
+            this.gameBoard = saveData;
+            if (this.gameBoard.turn != oldTurn);
+                UpdateTurn();
+            foreach (var kv in gameBoard.getActivePieces())
+                getPanel(kv.Key).Children.Add(getImage(kv.Value));
+            // show message
+            infoText.Text = "Save loaded";
         }
     }
 }

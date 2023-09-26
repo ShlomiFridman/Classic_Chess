@@ -31,7 +31,7 @@ namespace Classic_Chess.MyClasses.Pieces
                     ChessPiece pieceAt = board.getPieceAt(after);
                     // add to moves if not an enemy
                     if (!isAlly(pieceAt)) // if empty or has enemy
-                        moves.Add(new Move(this.pos, after, pieceAt));
+                        moves.Add(new Move(this.pos, after, this, pieceAt));
                 }
             });
             return moves;
@@ -48,7 +48,7 @@ namespace Classic_Chess.MyClasses.Pieces
                 return null;
             var after = getAfterPos(offset);
             var pieceAt = board.getPieceAt(after);
-            return new Move(this.pos, after, pieceAt);
+            return new Move(this.pos, after, this, pieceAt);
         }
 
         public virtual bool MoveTo(Coords newPos)
@@ -102,16 +102,22 @@ namespace Classic_Chess.MyClasses.Pieces
         {
             return (other != null) ? other.color == this.color : false;
         }
+
+        // format TCPP (T - type [1,6], C - color [1,2], PP - coords [00,77])
+        public long getSaveValue()
+        {
+            return ((int)this.type)*1000 + ((int)this.color)*100 + this.pos.getSaveValue();
+        }
     }
 
-    enum Type
+    public enum Type
     {
-        King,Queen,Rook,Bishop,Knight,Pawn
+        King=6,Queen=5,Rook=4,Bishop=3,Knight=2,Pawn=1
     }
 
-    enum Color
+    public enum Color
     {
-        White,Black
+        Black=1,White=2
     }
 
 }

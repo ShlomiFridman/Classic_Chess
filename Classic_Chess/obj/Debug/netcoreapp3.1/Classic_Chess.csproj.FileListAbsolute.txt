@@ -36,3 +36,7 @@ C:\Users\Shlomi\Documents\GitHub\Classic_Chess\Classic_Chess\obj\Debug\netcoreap
 C:\Users\Shlomi\Documents\GitHub\Classic_Chess\Classic_Chess\obj\Debug\netcoreapp3.1\Classic_Chess.dll
 C:\Users\Shlomi\Documents\GitHub\Classic_Chess\Classic_Chess\obj\Debug\netcoreapp3.1\Classic_Chess.pdb
 C:\Users\Shlomi\Documents\GitHub\Classic_Chess\Classic_Chess\obj\Debug\netcoreapp3.1\Classic_Chess.genruntimeconfig.cache
+C:\Users\Shlomi\Documents\GitHub\Classic_Chess\Classic_Chess\bin\Debug\netcoreapp3.1\Newtonsoft.Json.dll
+C:\Users\Shlomi\Documents\GitHub\Classic_Chess\Classic_Chess\obj\Debug\netcoreapp3.1\Classic_Chess.csproj.CopyComplete
+C:\Users\Shlomi\Documents\GitHub\Classic_Chess\Classic_Chess\obj\Debug\netcoreapp3.1\PromotionDialog.g.cs
+C:\Users\Shlomi\Documents\GitHub\Classic_Chess\Classic_Chess\obj\Debug\netcoreapp3.1\PromotionDialog.baml

@@ -15,6 +15,12 @@ namespace Classic_Chess.MyClasses.Pieces
             this.y = y;
         }
 
+        public Coords(long x, long y)
+        {
+            this.x = (int) x;
+            this.y = (int) y;
+        }
+
         public override bool Equals(object obj)
         {
             return obj is Coords coords &&
@@ -25,6 +31,17 @@ namespace Classic_Chess.MyClasses.Pieces
         public override string ToString()
         {
             return $"({x},{y})";
+        }
+
+        // format XY
+        public long getSaveValue()
+        {
+            return x * 10 + y;
+        }
+
+        public static Coords getFromSave(long data)
+        {
+            return new Coords(data / 10, data % 10);
         }
     }
 }

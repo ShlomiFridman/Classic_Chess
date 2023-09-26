@@ -27,5 +27,15 @@ namespace Classic_Chess.MyClasses.Pieces
                     return null;
             }
         }
+
+        public static ChessPiece createPiece(long data)
+        {
+            if (data == 0)
+                return null;
+            Type type = (Type)(data / 1000);
+            Color color = (Color)(data / 100 %10);
+            Coords pos = Coords.getFromSave(data%100);
+            return createPiece(type, color, pos);
+        }
     }
 }
