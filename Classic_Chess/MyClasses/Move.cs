@@ -7,14 +7,14 @@ namespace Classic_Chess.MyClasses.Pieces
     class Move
     {
         public Coords before, after;
-        public ChessPiece piece, enemy;
+        public ChessPiece piece, pieceAt;
 
-        public Move(Coords before, Coords after, ChessPiece piece, ChessPiece enemy)
+        public Move(Coords before, Coords after, ChessPiece piece, ChessPiece pieceAt)
         {
             this.before = before;
             this.after = after;
             this.piece = piece;
-            this.enemy = enemy;
+            this.pieceAt = pieceAt;
         }
 
         // format BBAAPPPPEEEE - (BB - before, AA - after, PPPP - piece, EEEE - enemy)
@@ -22,7 +22,7 @@ namespace Classic_Chess.MyClasses.Pieces
         {
             long coords = before.getSaveValue() * 100 + after.getSaveValue();
             long pieceVal = piece.getSaveValue();
-            long emVal = (enemy == null) ? 0 : enemy.getSaveValue();
+            long emVal = (pieceAt == null) ? 0 : pieceAt.getSaveValue();
             return (coords * 10000 + pieceVal) * 10000 + emVal;
         }
 

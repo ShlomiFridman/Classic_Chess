@@ -46,8 +46,8 @@ namespace Classic_Chess.MyClasses
         {
             var piece = move.piece;
             // if hasEnemy is true, remove enemy from active
-            if (move.enemy != null)
-                this.removeFromActive(move.enemy);
+            if (move.pieceAt != null)
+                this.removeFromActive(move.pieceAt);
             // move the piece to the new position
             this.movePiece(piece, move.after);
             // add move to history
@@ -92,8 +92,8 @@ namespace Classic_Chess.MyClasses
             // move the piece to the old position
             this.movePiece(piece, move.before);
             // if had an enemy, revive him
-            if (move.enemy != null)
-                this.addToActive(move.enemy);
+            if (move.pieceAt != null)
+                this.addToActive(move.pieceAt);
             // push move to future
             future.Push(move);
             // update moves
@@ -214,7 +214,7 @@ namespace Classic_Chess.MyClasses
             if (kingPiece == null)
                 return true;
             // get his moves
-            var moves = kingPiece.validMoves;
+            var moves = kingPiece.validMoves.FindAll((move)=>(!move.piece.isAlly(move.pieceAt)));
             // get the enemy moves
             var enMoves = getAllMovesOf((color == Color.Black) ? Color.White : Color.Black);
             // if atleast he have 1 free move, return false
@@ -292,14 +292,6 @@ namespace Classic_Chess.MyClasses
                 data.Add(kv.Value.getSaveValue()*10+1);
             foreach (var val in graveyard)
                 data.Add(val.getSaveValue()*10);
-            // add the count of future moves, and the moves themselves
-            data.Add(future.Count);
-            foreach (var move in future)
-                data.Add(move.getSaveValue());
-            // add the count of history moves, and the moves themselves
-            data.Add(history.Count);
-            foreach (var move in history)
-                data.Add(move.getSaveValue());
             // convert the list into a string, and return it
             return string.Join(" ", data);
         }
@@ -313,7 +305,6 @@ namespace Classic_Chess.MyClasses
                 Board board = new Board();
                 ChessPiece piece;
                 int i = 1;
-                long count;
                 // get turn
                 board.turn = (Color)vals[0];
                 // get all pieces
@@ -326,25 +317,6 @@ namespace Classic_Chess.MyClasses
                     else
                         board.graveyard.Add(piece);
                 }
-                // get the count of future moves
-                count = vals[i++];
-                // get all future moves
-                while (count>0)
-                {
-                    board.future.Push(Move.getFromSave(vals[i++]));
-                    count--;
-                }
-                // get the count of history moves
-                count = vals[i++];
-                // get all history moves
-                while (count > 0)
-                {
-                    board.history.Push(Move.getFromSave(vals[i++]));
-                    count--;
-                }
-                // reverse the stacks
-                revStack(board.future);
-                revStack(board.history);
                 // update moves
                 board.updateMoves();
                 // return the result
@@ -354,15 +326,6 @@ namespace Classic_Chess.MyClasses
                 // if failed at any point, return null
                 return null;
             }
-        }
-
-        private static void revStack(Stack<Move> st)
-        {
-            Queue<Move> qu = new Queue<Move>();
-            while (st.Count != 0)
-                qu.Enqueue(st.Pop());
-            while (qu.Count != 0)
-                st.Push(qu.Dequeue());
         }
     }
 }

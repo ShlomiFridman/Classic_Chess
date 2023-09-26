@@ -29,9 +29,8 @@ namespace Classic_Chess.MyClasses.Pieces
                 {
                     Coords after = this.getAfterPos(offset);
                     ChessPiece pieceAt = board.getPieceAt(after);
-                    // add to moves if not an enemy
-                    if (!isAlly(pieceAt)) // if empty or has enemy
-                        moves.Add(new Move(this.pos, after, this, pieceAt));
+                    // add to moves
+                    moves.Add(new Move(this.pos, after, this, pieceAt));
                 }
             });
             return moves;
@@ -98,7 +97,7 @@ namespace Classic_Chess.MyClasses.Pieces
             return (other != null) ? other.color != this.color : false;
         }
 
-        protected bool isAlly(ChessPiece other)
+        public bool isAlly(ChessPiece other)
         {
             return (other != null) ? other.color == this.color : false;
         }

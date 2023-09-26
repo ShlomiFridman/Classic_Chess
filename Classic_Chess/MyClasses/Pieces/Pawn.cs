@@ -31,17 +31,13 @@ namespace Classic_Chess.MyClasses.Pieces
                 after = getAfterPos(this.movesOffsets[0]);
                 pieceAt = board.getPieceAt(after);
                 // if the space is empty, than the move is legal
-                if (pieceAt == null)
+                moves.Add(new Move(this.pos, after, this, pieceAt));
+                // check second move option if the pawn didn't moved from his starting position
+                if ((color == Color.Black && pos.y == 1) || (color == Color.White && pos.y == 6))
                 {
-                    moves.Add(new Move(this.pos, after, this, null));
-                    // check second move option if the pawn didn't moved from his starting position
-                    if ((color == Color.Black && pos.y == 1) || (color == Color.White && pos.y == 6))
-                    {
-                        after = getAfterPos(new Coords(0, 2 * colorMul));
-                        pieceAt = board.getPieceAt(after);
-                        if (pieceAt == null)
-                            moves.Add(new Move(this.pos, after, this, null));
-                    }
+                    after = getAfterPos(new Coords(0, 2 * colorMul));
+                    pieceAt = board.getPieceAt(after);
+                    moves.Add(new Move(this.pos, after, this, pieceAt));
                 }
             }
             if (checkOffset(this.movesOffsets[1]))

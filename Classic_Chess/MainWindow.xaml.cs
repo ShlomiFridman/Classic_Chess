@@ -79,8 +79,8 @@ namespace Classic_Chess
             if (selected != null)
             {
                 move = selected.validMoves.Find((move) => move.after.Equals(pos));
-                // if move isn't null, than its a move
-                if (move != null)
+                // if move isn't null, and not an ally, then its a move
+                if (move != null && !move.piece.isAlly(move.pieceAt))
                     makeMove(move, false);
                 // else show the moves of the position
                 else
@@ -93,7 +93,6 @@ namespace Classic_Chess
 
         private void makeMove(Move move, bool isRedo)
         {
-            UIElement img;
             StackPanel panel;
             var piece = move.piece;
             MyType promotSelection;
@@ -156,7 +155,15 @@ namespace Classic_Chess
             this.selected.validMoves.ForEach((move) =>
             {
                 var panel = getPanel(move.after);
-                panel.Background = move.enemy != null ? Brushes.DarkRed : Brushes.DeepSkyBlue;
+                // if empty
+                if (move.pieceAt == null)
+                    panel.Background = Brushes.DeepSkyBlue;
+                // if ally
+                else if (move.piece.isAlly(move.pieceAt))
+                    panel.Background = Brushes.DarkSlateBlue;
+                // else enemy
+                else
+                    panel.Background = Brushes.DarkRed;
             });
         }
 
@@ -254,9 +261,9 @@ namespace Classic_Chess
             getPanel(move.after).Children.Clear();
             getPanel(move.before).Children.Add(getImage(move.piece));
             // if there was an enemy, re-add its image
-            if (move.enemy != null)
+            if (move.pieceAt != null)
             {
-                getPanel(move.after).Children.Add(getImage(move.enemy));
+                getPanel(move.after).Children.Add(getImage(move.pieceAt));
             }
             // change turn back
             UpdateTurn();
@@ -313,12 +320,15 @@ namespace Classic_Chess
             foreach (var kv in gameBoard.getActivePieces())
                 getPanel(kv.Key).Children.Clear();
             this.gameBoard = saveData;
-            if (this.gameBoard.turn != oldTurn);
+            if (this.gameBoard.turn != oldTurn)
                 UpdateTurn();
             foreach (var kv in gameBoard.getActivePieces())
                 getPanel(kv.Key).Children.Add(getImage(kv.Value));
             // show message
             infoText.Text = "Save loaded";
+            // change buttons status
+            UndoBtn.IsEnabled = false;
+            RedoBtn.IsEnabled = false;
         }
     }
 }

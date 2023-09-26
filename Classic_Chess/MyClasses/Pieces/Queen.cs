@@ -38,11 +38,9 @@ namespace Classic_Chess.MyClasses.Pieces
                     if (!checkOffset(offsets[j]) || !flags[j])
                         continue;
                     move = getMoveAt(board, offsets[j]);
-                    // if not an ally, add move
-                    if (!isAlly(move.enemy))
-                        moves.Add(move);
+                    moves.Add(move);
                     // if the space not empty, end sequence
-                    if (move.enemy != null)
+                    if (move.pieceAt != null)
                         flags[j] = false;
                 }
             }
