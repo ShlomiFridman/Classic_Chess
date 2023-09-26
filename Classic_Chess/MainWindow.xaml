@@ -22,6 +22,7 @@
                 <Button x:Name="saveBtn" Padding="3" Margin="7" Content="Save" Click="saveBtn_Click"/>
                 <Button x:Name="loadBtn" Padding="3" Margin="7" Content="Load" Click="loadBtn_Click"/>
             </StackPanel>
+            <Button Padding="3" Margin="7"  Content="New Game" Click="NewGameBtn_Click"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <Button x:Name="UndoBtn" Padding="3" Margin="7" Content="Undo" IsEnabled="False" Click="UndoBtn_Click"/>
                 <Button x:Name="RedoBtn" Padding="3" Margin="7" Content="Redo" IsEnabled="False" Click="RedoBtn_Click"/>

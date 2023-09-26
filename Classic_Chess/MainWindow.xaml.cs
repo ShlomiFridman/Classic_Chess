@@ -135,8 +135,12 @@ namespace Classic_Chess
             // check checkmate
             if (gameBoard.check_Checkmate(gameBoard.turn))
             {
+                // show message and change UI flags
                 infoText.Text = ((gameBoard.turn == MyColor.White) ? MyColor.Black.ToString() : MyColor.White.ToString()) + " Wins";
-                resetBoard();
+                // remove turn message
+                turnText.Text = "";
+                //resetBoard();
+                BoardGrid.IsHitTestVisible = false;
             }
         }
 
@@ -214,16 +218,23 @@ namespace Classic_Chess
             // reset turn flag and selected
             gameBoard.turn = MyColor.White;
             turnText.Text = gameBoard.turn.ToString() + "'s turn";
+            infoText.Text = "";
             selected = null;
-            // change buttons status
+            // change UI flags
             UndoBtn.IsEnabled = false;
             RedoBtn.IsEnabled = false;
+            BoardGrid.IsHitTestVisible = true;
         }
 
         private void UpdateTurn()
         {
             // flip turn, update text, and null select
-            gameBoard.turn = gameBoard.turn == MyColor.White ? MyColor.Black : MyColor.White;
+            gameBoard.turn = (gameBoard.turn == MyColor.White) ? MyColor.Black : MyColor.White;
+            UpdateTurnUI();
+        }
+        private void UpdateTurnUI()
+        {
+            // update text, and null select
             turnText.Text = gameBoard.turn.ToString() + "'s turn";
             selected = null;
             // delete info text if there is any
@@ -272,6 +283,9 @@ namespace Classic_Chess
             // check if need to disable undo button
             if (gameBoard.haveUndo() == false)
                 UndoBtn.IsEnabled = false;
+            // change if need to make the grid hit-able
+            if (!BoardGrid.IsHitTestVisible)
+                BoardGrid.IsHitTestVisible = true;
         }
 
         private void RedoBtn_Click(object sender, RoutedEventArgs e)
@@ -304,8 +318,7 @@ namespace Classic_Chess
 
         private void loadBtn_Click(object sender, RoutedEventArgs e)
         {
-            // save the old turn, for later use
-            MyColor oldTurn = gameBoard.turn;
+            bool wflag, bflag;
             // get save data
             string data = Properties.Settings.Default.SaveData1;
             // build the object
@@ -320,8 +333,7 @@ namespace Classic_Chess
             foreach (var kv in gameBoard.getActivePieces())
                 getPanel(kv.Key).Children.Clear();
             this.gameBoard = saveData;
-            if (this.gameBoard.turn != oldTurn)
-                UpdateTurn();
+            UpdateTurnUI();
             foreach (var kv in gameBoard.getActivePieces())
                 getPanel(kv.Key).Children.Add(getImage(kv.Value));
             // show message
@@ -329,6 +341,25 @@ namespace Classic_Chess
             // change buttons status
             UndoBtn.IsEnabled = false;
             RedoBtn.IsEnabled = false;
+            // if in checkmate, change flags
+            wflag = gameBoard.check_Checkmate(MyColor.Black);
+            bflag = gameBoard.check_Checkmate(MyColor.White);
+            if ( wflag || bflag)
+            {
+                // show message and change UI flags
+                infoText.Text = ((bflag) ? MyColor.Black.ToString() : MyColor.White.ToString()) + " Wins";
+                // remove turn message
+                turnText.Text = "";
+                //resetBoard();
+                BoardGrid.IsHitTestVisible = false;
+            }
+            else
+                BoardGrid.IsHitTestVisible = true;
+        }
+
+        private void NewGameBtn_Click(object sender, RoutedEventArgs e)
+        {
+            resetBoard();
         }
     }
 }

@@ -3,3 +3,4 @@ C:\Users\Shlomi\Desktop\Classic_Chess\Classic_Chess.dll
 C:\Users\Shlomi\Desktop\Classic_Chess\Classic_Chess.deps.json
 C:\Users\Shlomi\Desktop\Classic_Chess\Classic_Chess.runtimeconfig.json
 C:\Users\Shlomi\Desktop\Classic_Chess\Classic_Chess.pdb
+C:\Users\Shlomi\Desktop\Classic_Chess\Newtonsoft.Json.dll
