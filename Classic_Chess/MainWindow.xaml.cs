@@ -1,19 +1,12 @@
 ﻿using Classic_Chess.MyClasses;
 using Classic_Chess.MyClasses.Pieces;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using MyColor = Classic_Chess.MyClasses.Pieces.Color;
 using MyType = Classic_Chess.MyClasses.Pieces.Type;
 
@@ -208,6 +201,8 @@ namespace Classic_Chess
             {
                 getPanel(kv.Key).Children.Clear();
             }
+            // clear graveyard
+            graveyardPanel.Children.Clear();
             // reset game
             gameBoard.resetBoard();
             // set the new pieces
@@ -244,13 +239,17 @@ namespace Classic_Chess
 
         private void movePiece(Coords from, Coords to)
         {
-
+            UIElement enImg;
             var fromPanel = getPanel(from);
             var toPanel = getPanel(to);
             UIElement img;
-            // if need be remove enemy image
+            // if need be remove enemy image to the graveyard
             if (toPanel.Children.Count != 0)
+            {
+                enImg = toPanel.Children[0];
                 toPanel.Children.Clear();
+                graveyardPanel.Children.Add(enImg);
+            }
             img = fromPanel.Children[0];
             fromPanel.Children.Clear();
             toPanel.Children.Add(img);
@@ -258,6 +257,8 @@ namespace Classic_Chess
 
         private void UndoBtn_Click(object sender, RoutedEventArgs e)
         {
+            Move move;
+            UIElement enImg;
             // if there is nothing to undo, show message and return
             if (gameBoard.haveUndo() == false)
             {
@@ -267,14 +268,16 @@ namespace Classic_Chess
             // hide shown moves
             hideMoves();
             // make the move, and get it from board
-            var move = gameBoard.undo();
+            move = gameBoard.undo();
             // update piece image and position
             getPanel(move.after).Children.Clear();
             getPanel(move.before).Children.Add(getImage(move.piece));
-            // if there was an enemy, re-add its image
+            // if there was an enemy, re-add its image from graveyard
             if (move.pieceAt != null)
             {
-                getPanel(move.after).Children.Add(getImage(move.pieceAt));
+                enImg = graveyardPanel.Children[graveyardPanel.Children.Count - 1];
+                graveyardPanel.Children.Remove(enImg);
+                getPanel(move.after).Children.Add(enImg);
             }
             // change turn back
             UpdateTurn();
@@ -313,7 +316,7 @@ namespace Classic_Chess
             Properties.Settings.Default.SaveData1 = saveData;
             Properties.Settings.Default.Save();
             // show message
-            infoText.Text = "Saved data";
+            infoText.Text = "Saved Board";
         }
 
         private void loadBtn_Click(object sender, RoutedEventArgs e)
@@ -329,15 +332,21 @@ namespace Classic_Chess
                 infoText.Text = "No save data";
                 return;
             }
+            // clear graveyard
+            graveyardPanel.Children.Clear();
             // clear the board and load the save
             foreach (var kv in gameBoard.getActivePieces())
                 getPanel(kv.Key).Children.Clear();
             this.gameBoard = saveData;
             UpdateTurnUI();
+            // load active pieces to board
             foreach (var kv in gameBoard.getActivePieces())
                 getPanel(kv.Key).Children.Add(getImage(kv.Value));
+            // load graveyard
+            foreach (var piece in gameBoard.getGraveyard())
+                graveyardPanel.Children.Add(getImage(piece));
             // show message
-            infoText.Text = "Save loaded";
+            infoText.Text = "Board loaded";
             // change buttons status
             UndoBtn.IsEnabled = false;
             RedoBtn.IsEnabled = false;

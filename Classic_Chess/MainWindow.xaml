@@ -7,26 +7,37 @@
         Icon="pack://application:,,,/assets/icon.png"
         ResizeMode="NoResize"
         mc:Ignorable="d"
-        Title="MainWindow" Height="550" Width="800" Background="AntiqueWhite">
-    <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+        SizeToContent="WidthAndHeight"
+        Title="MainWindow" Background="AntiqueWhite">
+    <Grid Margin="10" HorizontalAlignment="Center" Height="520" VerticalAlignment="Center">
         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="2*"/>
-            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <Border BorderThickness="6" BorderBrush="DarkSlateGray" Margin="3">
-            <Grid x:Name="BoardGrid" Background="SaddleBrown" MinWidth="497" MinHeight="500" Grid.Column="0">
+        <StackPanel Orientation="Vertical" Width="200" Grid.Column="0" Margin="5 0" HorizontalAlignment="Center">
+            <TextBlock Text="Graveyard" FontSize="15" TextDecorations="Underline" HorizontalAlignment="Center"/>
+            <WrapPanel x:Name="graveyardPanel" MaxHeight="500" Orientation="Horizontal"/>
+        </StackPanel>
+        <Border BorderThickness="6" BorderBrush="DarkSlateGray" MinWidth="497" Height="500" Margin="3" Grid.Column="1">
+            <Grid x:Name="BoardGrid" Background="SaddleBrown">
             </Grid>
         </Border>
-        <StackPanel Orientation="Vertical" Grid.Column="1">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <Button x:Name="saveBtn" Padding="3" Margin="7" Content="Save" Click="saveBtn_Click"/>
-                <Button x:Name="loadBtn" Padding="3" Margin="7" Content="Load" Click="loadBtn_Click"/>
-            </StackPanel>
-            <Button Padding="3" Margin="7"  Content="New Game" Click="NewGameBtn_Click"/>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <Button x:Name="UndoBtn" Padding="3" Margin="7" Content="Undo" IsEnabled="False" Click="UndoBtn_Click"/>
-                <Button x:Name="RedoBtn" Padding="3" Margin="7" Content="Redo" IsEnabled="False" Click="RedoBtn_Click"/>
-            </StackPanel>
+        <StackPanel Orientation="Vertical" Grid.Column="2" Margin="20 0">
+            <Border BorderThickness="1" BorderBrush="Black" Margin="5">
+                <StackPanel Orientation="Vertical" Margin="4">
+                    <TextBlock FontSize="12" HorizontalAlignment="Center" TextDecorations="Underline" Text="Menu" />
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Button x:Name="saveBtn" Padding="3" Margin="7" Content="Save" Click="saveBtn_Click"/>
+                        <Button x:Name="loadBtn" Padding="3" Margin="7" Content="Load" Click="loadBtn_Click"/>
+                    </StackPanel>
+                    <Button Padding="3" Margin="7"  Content="New Game" Click="NewGameBtn_Click"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Button x:Name="UndoBtn" Padding="3" Margin="7" Content="Undo" IsEnabled="False" Click="UndoBtn_Click"/>
+                        <Button x:Name="RedoBtn" Padding="3" Margin="7" Content="Redo" IsEnabled="False" Click="RedoBtn_Click"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
             <TextBlock x:Name="turnText" Margin="7" Width="100" TextAlignment="Center">White's turn</TextBlock>
             <TextBlock x:Name="infoText" Margin="7" Width="100" TextAlignment="Center"></TextBlock>
         </StackPanel>

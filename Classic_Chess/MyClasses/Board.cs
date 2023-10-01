@@ -282,6 +282,11 @@ namespace Classic_Chess.MyClasses
             return this.activePieces;
         }
 
+        public List<ChessPiece> getGraveyard()
+        {
+            return this.graveyard;
+        }
+
         public string getSaveData()
         {
             List<long> data = new List<long>();
