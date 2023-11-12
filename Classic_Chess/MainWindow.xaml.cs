@@ -41,24 +41,36 @@ namespace Classic_Chess
                 {
                     Width = new GridLength(62)
                 });
+                FlippedBoardGrid.RowDefinitions.Add(new RowDefinition()
+                {
+                    Height = new GridLength(62)
+                });
+                FlippedBoardGrid.ColumnDefinitions.Add(new ColumnDefinition()
+                {
+                    Width = new GridLength(62)
+                });
             }
             for (i = 0; i < 8; i++)
                 for (j = 0; j < 8; j++) 
                 {
-                    var pos = new Coords(j, i);
-                    var piece = gameBoard.getPieceAt(pos);
-                    var stackPanel = new StackPanel();
-                    Grid.SetRow(stackPanel, i);
-                    Grid.SetColumn(stackPanel, j);
-                    stackPanel.Background = ((i + j) % 2 == 0)? Brushes.GhostWhite : Brushes.DarkGray;
-                    stackPanel.Tag = pos;
-                    stackPanel.MouseLeftButtonUp += panelMouseLeftButtonUp;
-                    stackPanel.Margin = new Thickness(1);
-                    stackPanel.MinHeight = stackPanel.MinWidth = 50;
-                    // if there is a piece there, add img
+                    var piece = gameBoard.getPieceAt(new Coords(j, i));
+                    // create the reguler panel
+                    var panel = createStackPanel(new Coords(j, i));
+                    // add the click event
+                    panel.MouseLeftButtonUp += panelMouseLeftButtonUp;
+                    // add the panel to the board
+                    BoardGrid.Children.Add(panel);
+                    // create the flipped panel
+                    var flippedPanel = createStackPanel(new Coords(j, (7-i)%8));
+                    // set tag to the regular panel
+                    flippedPanel.Tag = panel;
+                    // add the flipped click event
+                    flippedPanel.MouseLeftButtonUp += flippedPanelMouseLeftButtonUp;
+                    // add the fpanel to the fboard
+                    FlippedBoardGrid.Children.Add(flippedPanel);
+                    // add image, if needed
                     if (piece != null)
-                        stackPanel.Children.Add(getImage(piece));
-                    BoardGrid.Children.Add(stackPanel);
+                        setImage(panel, piece, true);
                 }
         }
 
@@ -84,17 +96,23 @@ namespace Classic_Chess
                 showMoves(pos);
         }
 
+        private void flippedPanelMouseLeftButtonUp(object obj, MouseButtonEventArgs e)
+        {
+            StackPanel fp = (StackPanel)obj;
+            panelMouseLeftButtonUp(fp.Tag, e);
+        }
+
         private void makeMove(Move move, bool isRedo)
         {
+            int checkFlag;
             StackPanel panel;
             var piece = move.piece;
             MyType promotSelection;
             // make move on gameBoard
             gameBoard.makeMove(move, isRedo);
             // move the piece image
-            movePiece(move.before, move.after);
-            // change turn
-            UpdateTurn();
+            movePiece(getPanel(move.before), getPanel(move.after), false);
+            movePiece(getFPanel(move.before), getFPanel(move.after), true);
             // change enabled status for the redo and undo buttons
             UndoBtn.IsEnabled = true;
             RedoBtn.IsEnabled = false;
@@ -106,17 +124,14 @@ namespace Classic_Chess
                 if (dialog.ShowDialog() == true)
                 {
                     promotSelection = dialog.Selection;
-                    // TODO promote pawn
                     // promote the pawn
                     gameBoard.promotePawnAt(piece.pos, promotSelection);
                     // get updated piece
                     piece = gameBoard.getPieceAt(piece.pos);
-                    // update image
+                    // update image in the panel
                     panel = getPanel(piece.pos);
-                    // clear previous image
-                    panel.Children.Clear();
                     // add new image
-                    panel.Children.Add(getImage(piece));
+                    setImage(panel, piece, true);
                 }
                 // if no option was selected, undo the move
                 else
@@ -126,15 +141,18 @@ namespace Classic_Chess
                 }
             }
             // check checkmate
-            if (gameBoard.check_Checkmate(gameBoard.turn))
+            checkFlag = gameBoard.check_Checkmate();
+            if (checkFlag != 0)
             {
                 // show message and change UI flags
-                infoText.Text = ((gameBoard.turn == MyColor.White) ? MyColor.Black.ToString() : MyColor.White.ToString()) + " Wins";
-                // remove turn message
-                turnText.Text = "";
+                infoText.Text = ((checkFlag == 2) ? MyColor.Black.ToString() : MyColor.White.ToString()) + " Wins";
                 //resetBoard();
                 BoardGrid.IsHitTestVisible = false;
+                FlippedBoardGrid.IsHitTestVisible = false;
+                return;
             }
+            // change turn
+            UpdateTurn();
         }
 
         private void showMoves(Coords pos)
@@ -151,6 +169,7 @@ namespace Classic_Chess
             // highlight all moves
             this.selected.validMoves.ForEach((move) =>
             {
+                //var panel = (gameBoard.turn == MyColor.White)? getPanel(move.after) : getFPanel(move.after);
                 var panel = getPanel(move.after);
                 // if empty
                 if (move.pieceAt == null)
@@ -161,6 +180,16 @@ namespace Classic_Chess
                 // else enemy
                 else
                     panel.Background = Brushes.DarkRed;
+                // show the moves on the flipped board
+                var fpanel = getFPanel(move.after);
+                if (move.pieceAt == null)
+                    fpanel.Background = Brushes.DeepSkyBlue;
+                // if ally
+                else if (move.piece.isAlly(move.pieceAt))
+                    fpanel.Background = Brushes.DarkSlateBlue;
+                // else enemy
+                else
+                    fpanel.Background = Brushes.DarkRed;
             });
         }
 
@@ -172,6 +201,7 @@ namespace Classic_Chess
             this.selected.validMoves.ForEach((move) =>
             {
                 getPanel(move.after).Background = ((move.after.x + move.after.y) % 2 == 0) ? Brushes.GhostWhite : Brushes.DarkGray;
+                getFPanel(move.after).Background = ((move.after.x + move.after.y) % 2 != 0) ? Brushes.GhostWhite : Brushes.DarkGray;
             });
         }
 
@@ -180,9 +210,31 @@ namespace Classic_Chess
             return (StackPanel) BoardGrid.Children.Cast<UIElement>().First((el) => (Grid.GetRow(el) == pos.y && Grid.GetColumn(el) == pos.x));
         }
 
+        private StackPanel getFPanel(Coords pos)
+        {
+            return (StackPanel)FlippedBoardGrid.Children.Cast<UIElement>().First((el) => ((7 - Grid.GetRow(el)%8) == pos.y && Grid.GetColumn(el) == pos.x));
+        }
+
         private Coords getPos(Object obj)
         {
             return (Coords) ((StackPanel) obj).Tag;
+        }
+
+        private void setImage(StackPanel panel, ChessPiece piece, bool addToFlipped)
+        {
+            // create the image
+            Image img = getImage(piece);
+            // if there was already a child to the panel, remove it
+            if (panel.Children.Count != 0)
+                panel.Children.Clear();
+            // add the image
+            panel.Children.Add(img);
+            // if the flag is true, add to flipped board
+            if (addToFlipped)
+            {
+                var fpanel = getFPanel((Coords)panel.Tag);
+                setImage(fpanel, piece, false);
+            }
         }
 
         private Image getImage(ChessPiece piece)
@@ -201,6 +253,12 @@ namespace Classic_Chess
             {
                 getPanel(kv.Key).Children.Clear();
             }
+            // clear flipped board, O(1)
+            foreach (var child in FlippedBoardGrid.Children)
+            {
+                StackPanel fp = (StackPanel)child;
+                fp.Children.Clear();
+            }
             // clear graveyard
             graveyardPanel.Children.Clear();
             // reset game
@@ -208,17 +266,17 @@ namespace Classic_Chess
             // set the new pieces
             foreach (var kv in gameBoard.getActivePieces())
             {
-                getPanel(kv.Key).Children.Add(getImage(kv.Value));
+                setImage(getPanel(kv.Key), kv.Value, true);
             }
             // reset turn flag and selected
             gameBoard.turn = MyColor.White;
-            turnText.Text = gameBoard.turn.ToString() + "'s turn";
-            infoText.Text = "";
+            UpdateTurnUI();
             selected = null;
             // change UI flags
             UndoBtn.IsEnabled = false;
             RedoBtn.IsEnabled = false;
             BoardGrid.IsHitTestVisible = true;
+            FlippedBoardGrid.IsHitTestVisible = true;
         }
 
         private void UpdateTurn()
@@ -227,6 +285,7 @@ namespace Classic_Chess
             gameBoard.turn = (gameBoard.turn == MyColor.White) ? MyColor.Black : MyColor.White;
             UpdateTurnUI();
         }
+
         private void UpdateTurnUI()
         {
             // update text, and null select
@@ -235,20 +294,31 @@ namespace Classic_Chess
             // delete info text if there is any
             if (infoText.Text.Length != 0)
                 infoText.Text = "";
+            // show the right board
+            if (gameBoard.turn == MyColor.White)
+            {
+                BoardGrid.Visibility = Visibility.Visible;
+                FlippedBoardGrid.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                BoardGrid.Visibility = Visibility.Collapsed;
+                FlippedBoardGrid.Visibility = Visibility.Visible;
+            }
         }
 
-        private void movePiece(Coords from, Coords to)
+        private void movePiece(StackPanel fromPanel, StackPanel toPanel, bool isFlipped)
         {
             UIElement enImg;
-            var fromPanel = getPanel(from);
-            var toPanel = getPanel(to);
             UIElement img;
             // if need be remove enemy image to the graveyard
             if (toPanel.Children.Count != 0)
             {
                 enImg = toPanel.Children[0];
                 toPanel.Children.Clear();
-                graveyardPanel.Children.Add(enImg);
+                // add to graveyard only if not flipped panel
+                if (!isFlipped)
+                    graveyardPanel.Children.Add(enImg);
             }
             img = fromPanel.Children[0];
             fromPanel.Children.Clear();
@@ -271,13 +341,14 @@ namespace Classic_Chess
             move = gameBoard.undo();
             // update piece image and position
             getPanel(move.after).Children.Clear();
-            getPanel(move.before).Children.Add(getImage(move.piece));
+            getFPanel(move.after).Children.Clear();
+            setImage(getPanel(move.before), move.piece, true);
             // if there was an enemy, re-add its image from graveyard
             if (move.pieceAt != null)
             {
                 enImg = graveyardPanel.Children[graveyardPanel.Children.Count - 1];
                 graveyardPanel.Children.Remove(enImg);
-                getPanel(move.after).Children.Add(enImg);
+                setImage(getPanel(move.after), move.pieceAt, true);
             }
             // change turn back
             UpdateTurn();
@@ -288,7 +359,10 @@ namespace Classic_Chess
                 UndoBtn.IsEnabled = false;
             // change if need to make the grid hit-able
             if (!BoardGrid.IsHitTestVisible)
+            {
                 BoardGrid.IsHitTestVisible = true;
+                FlippedBoardGrid.IsHitTestVisible = true;
+            }
         }
 
         private void RedoBtn_Click(object sender, RoutedEventArgs e)
@@ -321,7 +395,7 @@ namespace Classic_Chess
 
         private void loadBtn_Click(object sender, RoutedEventArgs e)
         {
-            bool wflag, bflag;
+            int checkFlag;
             // get save data
             string data = Properties.Settings.Default.SaveData1;
             // build the object
@@ -332,16 +406,22 @@ namespace Classic_Chess
                 infoText.Text = "No save data";
                 return;
             }
+            // hide moves if there are any
+            if (selected != null)
+                hideMoves();
             // clear graveyard
             graveyardPanel.Children.Clear();
             // clear the board and load the save
             foreach (var kv in gameBoard.getActivePieces())
+            {
                 getPanel(kv.Key).Children.Clear();
+                getFPanel(kv.Key).Children.Clear();
+            }
             this.gameBoard = saveData;
             UpdateTurnUI();
             // load active pieces to board
             foreach (var kv in gameBoard.getActivePieces())
-                getPanel(kv.Key).Children.Add(getImage(kv.Value));
+                setImage(getPanel(kv.Key), kv.Value, true);
             // load graveyard
             foreach (var piece in gameBoard.getGraveyard())
                 graveyardPanel.Children.Add(getImage(piece));
@@ -351,24 +431,38 @@ namespace Classic_Chess
             UndoBtn.IsEnabled = false;
             RedoBtn.IsEnabled = false;
             // if in checkmate, change flags
-            wflag = gameBoard.check_Checkmate(MyColor.Black);
-            bflag = gameBoard.check_Checkmate(MyColor.White);
-            if ( wflag || bflag)
+            checkFlag = gameBoard.check_Checkmate();
+            if (checkFlag != 0)
             {
                 // show message and change UI flags
-                infoText.Text = ((bflag) ? MyColor.Black.ToString() : MyColor.White.ToString()) + " Wins";
-                // remove turn message
-                turnText.Text = "";
+                infoText.Text = ((checkFlag == 2) ? MyColor.Black.ToString() : MyColor.White.ToString()) + " Wins";
                 //resetBoard();
                 BoardGrid.IsHitTestVisible = false;
+                FlippedBoardGrid.IsHitTestVisible = false;
             }
             else
+            {
                 BoardGrid.IsHitTestVisible = true;
+                FlippedBoardGrid.IsHitTestVisible = true;
+            }
         }
 
         private void NewGameBtn_Click(object sender, RoutedEventArgs e)
         {
             resetBoard();
+        }
+
+        private StackPanel createStackPanel(Coords pos)
+        {
+            var stackPanel = new StackPanel();
+            int i = pos.y, j = pos.x;
+            Grid.SetRow(stackPanel, i);
+            Grid.SetColumn(stackPanel, j);
+            stackPanel.Background = ((i + j) % 2 == 0) ? Brushes.GhostWhite : Brushes.DarkGray;
+            stackPanel.Tag = pos;
+            stackPanel.Margin = new Thickness(1);
+            stackPanel.MinHeight = stackPanel.MinWidth = 50;
+            return stackPanel;
         }
     }
 }

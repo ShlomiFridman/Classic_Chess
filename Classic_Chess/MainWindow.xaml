@@ -20,8 +20,12 @@
             <WrapPanel x:Name="graveyardPanel" MaxHeight="500" Orientation="Horizontal"/>
         </StackPanel>
         <Border BorderThickness="6" BorderBrush="DarkSlateGray" MinWidth="497" Height="500" Margin="3" Grid.Column="1">
-            <Grid x:Name="BoardGrid" Background="SaddleBrown">
-            </Grid>
+            <StackPanel Background="SaddleBrown">
+                <Grid x:Name="BoardGrid" Visibility="Visible">
+                </Grid>
+                <Grid x:Name="FlippedBoardGrid" Visibility="Collapsed">
+                </Grid>
+            </StackPanel>
         </Border>
         <StackPanel Orientation="Vertical" Grid.Column="2" Margin="20 0">
             <Border BorderThickness="1" BorderBrush="Black" Margin="5">

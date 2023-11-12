@@ -206,7 +206,20 @@ namespace Classic_Chess.MyClasses
             return true;
         }
 
-        public bool check_Checkmate(Color color)
+        /// <summary>
+        /// check if one side is at checkmate, if one is return the winning color (0 - no checkmate , 1 - white wins , 2 - black wins)
+        /// </summary>
+        /// <returns></returns>
+        public int check_Checkmate()
+        {
+            if (atCheckmate(Color.White))
+                return 2;
+            else if (atCheckmate(Color.Black))
+                return 1;
+            return 0;
+        }
+
+        private bool atCheckmate(Color color)
         {
             // get the king
             var kingPiece = (color == Color.Black ? blackPieces : whitePieces).Find(piece => piece.type == Pieces.Type.King);
