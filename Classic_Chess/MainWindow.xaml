@@ -4,46 +4,78 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Classic_Chess"
-        Icon="pack://application:,,,/assets/icon.png"
+        Icon="pack://application:,,,/assets/images/icon.png"
         ResizeMode="NoResize"
         mc:Ignorable="d"
         SizeToContent="WidthAndHeight"
-        Title="MainWindow" Background="AntiqueWhite">
-    <Grid Margin="10" HorizontalAlignment="Center" Height="520" VerticalAlignment="Center">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="2*"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
-        <StackPanel Orientation="Vertical" Width="200" Grid.Column="0" Margin="5 0" HorizontalAlignment="Center">
-            <TextBlock Text="Graveyard" FontSize="15" TextDecorations="Underline" HorizontalAlignment="Center"/>
-            <WrapPanel x:Name="graveyardPanel" MaxHeight="500" Orientation="Horizontal"/>
-        </StackPanel>
-        <Border BorderThickness="6" BorderBrush="DarkSlateGray" MinWidth="497" Height="500" Margin="3" Grid.Column="1">
-            <StackPanel Background="SaddleBrown">
-                <Grid x:Name="BoardGrid" Visibility="Visible">
-                </Grid>
-                <Grid x:Name="FlippedBoardGrid" Visibility="Collapsed">
-                </Grid>
+        Title="Classic Chess" Background="AntiqueWhite">
+    <StackPanel Orientation="Vertical" Margin="0 0 40 0">
+        <Grid Margin="10" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="2*"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Orientation="Vertical" Width="200" Grid.Column="0" Margin="5 0" HorizontalAlignment="Center">
+                <!-- menu tray -->
+                <Border Width="140" Background="WhiteSmoke" BorderBrush="Black" BorderThickness="1">
+                    <!-- the toolbar to replace the old menu -->
+                    <ToolBarTray>
+                        <ToolBar Band="1" BandIndex="1" ToolBarTray.IsLocked="True" Loaded="ToolBar_Loaded">
+                            <Button ToolTip="New Game" Width="23" Click="NewGameBtn_Click">
+                                <Image Source="pack://application:,,,/assets/images/new.png" />
+                            </Button>
+                            <Button ToolTip="Save Game" Width="23" Click="saveBtn_Click">
+                                <Image Source="pack://application:,,,/assets/images/save.png" />
+                            </Button>
+                            <Button ToolTip="Load Game" Width="23" Click="loadBtn_Click">
+                                <Image Source="pack://application:,,,/assets/images/load.png" />
+                            </Button>
+                            <Separator/>
+                            <Button ToolTip="Undo Move" x:Name="UndoBtn" Width="23" Click="UndoBtn_Click" IsEnabled="false">
+                                <Image x:Name="UndoImg" Source="pack://application:,,,/assets/images/undo_grey.png"/>
+                            </Button>
+                            <Button ToolTip="Redo Move" x:Name="RedoBtn" Width="23" Click="RedoBtn_Click" IsEnabled="false">
+                                <Image x:Name="RedoImg" Source="pack://application:,,,/assets/images/redo_grey.png"/>
+                            </Button>
+                        </ToolBar>
+                    </ToolBarTray>
+                </Border>
+                <!-- info texts -->
+                <TextBlock x:Name="turnText" Margin="0 7 0 0" Width="100" TextAlignment="Center">White's turn</TextBlock>
+                <TextBlock x:Name="infoText" TextAlignment="Center" FontWeight="Bold"></TextBlock>
+                <!-- graveyard -->
+                <TextBlock Text="Graveyard" FontSize="15" TextDecorations="Underline" HorizontalAlignment="Center"/>
+                <WrapPanel x:Name="graveyardPanel" Height="500" Orientation="Horizontal"/>
             </StackPanel>
-        </Border>
-        <StackPanel Orientation="Vertical" Grid.Column="2" Margin="20 0">
-            <Border BorderThickness="1" BorderBrush="Black" Margin="5">
-                <StackPanel Orientation="Vertical" Margin="4">
-                    <TextBlock FontSize="12" HorizontalAlignment="Center" TextDecorations="Underline" Text="Menu" />
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                        <Button x:Name="saveBtn" Padding="3" Margin="7" Content="Save" Click="saveBtn_Click"/>
-                        <Button x:Name="loadBtn" Padding="3" Margin="7" Content="Load" Click="loadBtn_Click"/>
-                    </StackPanel>
-                    <Button Padding="3" Margin="7"  Content="New Game" Click="NewGameBtn_Click"/>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                        <Button x:Name="UndoBtn" Padding="3" Margin="7" Content="Undo" IsEnabled="False" Click="UndoBtn_Click"/>
-                        <Button x:Name="RedoBtn" Padding="3" Margin="7" Content="Redo" IsEnabled="False" Click="RedoBtn_Click"/>
-                    </StackPanel>
+            <Border BorderThickness="6" BorderBrush="DarkSlateGray" MinWidth="497" Height="500" Margin="3" Grid.Column="1">
+                <StackPanel Background="SaddleBrown">
+                    <Grid x:Name="BoardGrid" Visibility="Visible">
+                    </Grid>
+                    <Grid x:Name="FlippedBoardGrid" Visibility="Collapsed">
+                    </Grid>
                 </StackPanel>
             </Border>
-            <TextBlock x:Name="turnText" Margin="7" Width="100" TextAlignment="Center">White's turn</TextBlock>
-            <TextBlock x:Name="infoText" Margin="7" Width="100" TextAlignment="Center"></TextBlock>
-        </StackPanel>
-    </Grid>
+            <!-- old menu and info text -->
+            <!--
+            <StackPanel Orientation="Vertical" Grid.Column="2" Margin="20 0">
+                <Border BorderThickness="1" BorderBrush="Black" Margin="5">
+                    <StackPanel Orientation="Vertical" Margin="4">
+                        <TextBlock FontSize="12" HorizontalAlignment="Center" TextDecorations="Underline" Text="Menu" />
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Button x:Name="saveBtn" Padding="3" Margin="7" Content="Save" Click="saveBtn_Click"/>
+                            <Button x:Name="loadBtn" Padding="3" Margin="7" Content="Load" Click="loadBtn_Click"/>
+                        </StackPanel>
+                        <Button Padding="3" Margin="7"  Content="New Game" Click="NewGameBtn_Click"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Button x:Name="UndoBtn" Padding="3" Margin="7" Content="Undo" IsEnabled="False" Click="UndoBtn_Click"/>
+                            <Button x:Name="RedoBtn" Padding="3" Margin="7" Content="Redo" IsEnabled="False" Click="RedoBtn_Click"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+                <TextBlock x:Name="turnText" Margin="7" Width="100" TextAlignment="Center">White's turn</TextBlock>
+                <TextBlock x:Name="infoText" Margin="7" Width="100" TextAlignment="Center"></TextBlock>
+            </StackPanel>
+            -->
+        </Grid>
+    </StackPanel>
 </Window>

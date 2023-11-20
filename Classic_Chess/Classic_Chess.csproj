@@ -12,6 +12,13 @@
 
   <ItemGroup>
     <None Remove="assets\icon.png" />
+    <None Remove="assets\images\load.png" />
+    <None Remove="assets\images\new.png" />
+    <None Remove="assets\images\redo.png" />
+    <None Remove="assets\images\redo_grey.png" />
+    <None Remove="assets\images\save.png" />
+    <None Remove="assets\images\undo.png" />
+    <None Remove="assets\images\undo_grey.png" />
     <None Remove="assets\pieces\black_bishop.png" />
     <None Remove="assets\pieces\black_king.png" />
     <None Remove="assets\pieces\black_knight.png" />
@@ -31,7 +38,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="assets\icon.png" />
+    <Resource Include="assets\images\icon.png" />
+    <Resource Include="assets\images\load.png" />
+    <Resource Include="assets\images\new.png" />
+    <Resource Include="assets\images\redo.png" />
+    <Resource Include="assets\images\redo_grey.png" />
+    <Resource Include="assets\images\save.png" />
+    <Resource Include="assets\images\undo.png" />
+    <Resource Include="assets\images\undo_grey.png" />
     <Resource Include="assets\pieces\Black_Bishop.png" />
     <Resource Include="assets\pieces\Black_King.png" />
     <Resource Include="assets\pieces\Black_Knight.png" />

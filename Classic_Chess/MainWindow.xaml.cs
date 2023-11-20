@@ -114,8 +114,8 @@ namespace Classic_Chess
             movePiece(getPanel(move.before), getPanel(move.after), false);
             movePiece(getFPanel(move.before), getFPanel(move.after), true);
             // change enabled status for the redo and undo buttons
-            UndoBtn.IsEnabled = true;
-            RedoBtn.IsEnabled = false;
+            setUndoBtnStatus(true);
+            setRedoBtnStatus(false);
             // if pawn, check if need promotion
             if (gameBoard.needPromotion(piece))
             {
@@ -272,9 +272,11 @@ namespace Classic_Chess
             gameBoard.turn = MyColor.White;
             UpdateTurnUI();
             selected = null;
+            // clear info text
+            infoText.Text = "";
             // change UI flags
-            UndoBtn.IsEnabled = false;
-            RedoBtn.IsEnabled = false;
+            setUndoBtnStatus(false);
+            setRedoBtnStatus(false);
             BoardGrid.IsHitTestVisible = true;
             FlippedBoardGrid.IsHitTestVisible = true;
         }
@@ -291,9 +293,6 @@ namespace Classic_Chess
             // update text, and null select
             turnText.Text = gameBoard.turn.ToString() + "'s turn";
             selected = null;
-            // delete info text if there is any
-            if (infoText.Text.Length != 0)
-                infoText.Text = "";
             // show the right board
             if (gameBoard.turn == MyColor.White)
             {
@@ -353,10 +352,10 @@ namespace Classic_Chess
             // change turn back
             UpdateTurn();
             // enable redo button
-            RedoBtn.IsEnabled = true;
+            setRedoBtnStatus(true);
             // check if need to disable undo button
             if (gameBoard.haveUndo() == false)
-                UndoBtn.IsEnabled = false;
+                setUndoBtnStatus(false);
             // change if need to make the grid hit-able
             if (!BoardGrid.IsHitTestVisible)
             {
@@ -379,7 +378,7 @@ namespace Classic_Chess
             this.makeMove(move, true);
             // if there are more redos, re-enable the button
             if (gameBoard.haveRedo() == true)
-                RedoBtn.IsEnabled = true;
+                setUndoBtnStatus(true);
         }
 
         private void saveBtn_Click(object sender, RoutedEventArgs e)
@@ -400,6 +399,7 @@ namespace Classic_Chess
             string data = Properties.Settings.Default.SaveData1;
             // build the object
             var saveData = Board.getFromSave(data);
+            // clear info text
             // if the data is null, print message and return
             if (saveData == null)
             {
@@ -428,14 +428,14 @@ namespace Classic_Chess
             // show message
             infoText.Text = "Board loaded";
             // change buttons status
-            UndoBtn.IsEnabled = false;
-            RedoBtn.IsEnabled = false;
+            setUndoBtnStatus(false);
+            setRedoBtnStatus(false);
             // if in checkmate, change flags
             checkFlag = gameBoard.check_Checkmate();
             if (checkFlag != 0)
             {
                 // show message and change UI flags
-                infoText.Text = ((checkFlag == 2) ? MyColor.Black.ToString() : MyColor.White.ToString()) + " Wins";
+                infoText.Text += ", " + ((checkFlag == 2) ? MyColor.Black.ToString() : MyColor.White.ToString()) + " Wins";
                 //resetBoard();
                 BoardGrid.IsHitTestVisible = false;
                 FlippedBoardGrid.IsHitTestVisible = false;
@@ -463,6 +463,38 @@ namespace Classic_Chess
             stackPanel.Margin = new Thickness(1);
             stackPanel.MinHeight = stackPanel.MinWidth = 50;
             return stackPanel;
+        }
+
+        /// <summary>
+        /// hides the overflow button
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ToolBar_Loaded(object sender, RoutedEventArgs e)
+        {
+            ToolBar toolBar = sender as ToolBar;
+            var overflowGrid = toolBar.Template.FindName("OverflowGrid", toolBar) as FrameworkElement;
+            if (overflowGrid != null)
+            {
+                overflowGrid.Visibility = Visibility.Collapsed;
+            }
+
+            var mainPanelBorder = toolBar.Template.FindName("MainPanelBorder", toolBar) as FrameworkElement;
+            if (mainPanelBorder != null)
+            {
+                mainPanelBorder.Margin = new Thickness(0);
+            }
+        }
+
+        private void setUndoBtnStatus(bool status)
+        {
+            UndoBtn.IsEnabled = status;
+            UndoImg.Source = new BitmapImage(new Uri("pack://application:,,,/assets/images/undo"+ (UndoBtn.IsEnabled? "": "_grey") + ".png"));
+        }
+        private void setRedoBtnStatus(bool status)
+        {
+            RedoBtn.IsEnabled = status;
+            RedoImg.Source = new BitmapImage(new Uri("pack://application:,,,/assets/images/redo" + (RedoBtn.IsEnabled ? "" : "_grey") + ".png"));
         }
     }
 }
