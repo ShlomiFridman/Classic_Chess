@@ -34,5 +34,17 @@ namespace Classic_Chess.Properties {
                 this["SaveData1"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int Perspective {
+            get {
+                return ((int)(this["Perspective"]));
+            }
+            set {
+                this["Perspective"] = value;
+            }
+        }
     }
 }

@@ -14,6 +14,7 @@
     <None Remove="assets\icon.png" />
     <None Remove="assets\images\load.png" />
     <None Remove="assets\images\new.png" />
+    <None Remove="assets\images\perspective.png" />
     <None Remove="assets\images\redo.png" />
     <None Remove="assets\images\redo_grey.png" />
     <None Remove="assets\images\save.png" />
@@ -41,6 +42,7 @@
     <Resource Include="assets\images\icon.png" />
     <Resource Include="assets\images\load.png" />
     <Resource Include="assets\images\new.png" />
+    <Resource Include="assets\images\perspective.png" />
     <Resource Include="assets\images\redo.png" />
     <Resource Include="assets\images\redo_grey.png" />
     <Resource Include="assets\images\save.png" />

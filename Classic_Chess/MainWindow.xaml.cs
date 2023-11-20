@@ -22,9 +22,13 @@ namespace Classic_Chess
 
         private ChessPiece selected;
 
+        private int perspective;
+
         public MainWindow()
         {
             int i,j;
+            // load saved pers value
+            this.perspective = Properties.Settings.Default.Perspective;
             // init game board
             this.gameBoard = Board.getSetBoard();
             this.gameBoard.turn = MyColor.White;
@@ -72,6 +76,13 @@ namespace Classic_Chess
                     if (piece != null)
                         setImage(panel, piece, true);
                 }
+            // set the perspective options tags
+            PerDefault.Tag = 0;
+            PerWhite.Tag = 1;
+            PerBlack.Tag = 2;
+            // update perspective
+            updatePerspectiveUI();
+            updatePerFontWeight();
         }
 
         private void panelMouseLeftButtonUp(object obj, MouseButtonEventArgs e)
@@ -294,16 +305,7 @@ namespace Classic_Chess
             turnText.Text = gameBoard.turn.ToString() + "'s turn";
             selected = null;
             // show the right board
-            if (gameBoard.turn == MyColor.White)
-            {
-                BoardGrid.Visibility = Visibility.Visible;
-                FlippedBoardGrid.Visibility = Visibility.Collapsed;
-            }
-            else
-            {
-                BoardGrid.Visibility = Visibility.Collapsed;
-                FlippedBoardGrid.Visibility = Visibility.Visible;
-            }
+            updatePerspectiveUI();
         }
 
         private void movePiece(StackPanel fromPanel, StackPanel toPanel, bool isFlipped)
@@ -495,6 +497,51 @@ namespace Classic_Chess
         {
             RedoBtn.IsEnabled = status;
             RedoImg.Source = new BitmapImage(new Uri("pack://application:,,,/assets/images/redo" + (RedoBtn.IsEnabled ? "" : "_grey") + ".png"));
+        }
+
+        private void Perspective_Changed(object sender, RoutedEventArgs e)
+        {
+            int prev = this.perspective;
+            var sndr = (MenuItem)sender;
+            this.perspective = (int)sndr.Tag;
+            // if no change, return
+            if (prev == this.perspective)
+                return;
+            // set the font weight for the selected option
+            PerDefault.FontWeight = (sndr == PerDefault) ? FontWeights.Bold : FontWeights.Normal;
+            PerWhite.FontWeight = (sndr == PerDefault) ? FontWeights.Bold : FontWeights.Normal;
+            PerBlack.FontWeight = (sndr == PerDefault) ? FontWeights.Bold : FontWeights.Normal;
+            Properties.Settings.Default.Perspective = this.perspective;
+            Properties.Settings.Default.Save();
+            updatePerspectiveUI();
+            updatePerFontWeight();
+        }
+
+        private void updatePerspectiveUI()
+        {   
+            
+            if (this.perspective == 1 || (this.perspective==0 && gameBoard.turn == MyColor.White))
+            {
+                BoardGrid.Visibility = Visibility.Visible;
+                FlippedBoardGrid.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                BoardGrid.Visibility = Visibility.Collapsed;
+                FlippedBoardGrid.Visibility = Visibility.Visible;
+            }
+        }
+
+        private void updatePerFontWeight()
+        {
+            PerDefault.FontWeight = (perspective == (int) PerDefault.Tag) ? FontWeights.Bold : FontWeights.Normal;
+            PerWhite.FontWeight = (perspective == (int) PerWhite.Tag) ? FontWeights.Bold : FontWeights.Normal;
+            PerBlack.FontWeight = (perspective == (int) PerBlack.Tag) ? FontWeights.Bold : FontWeights.Normal;
+        }
+
+        private void PerMenuButton_Click(object sender, RoutedEventArgs e)
+        {
+            PerMenu.IsSubmenuOpen = true;
         }
     }
 }

@@ -17,7 +17,7 @@
             </Grid.ColumnDefinitions>
             <StackPanel Orientation="Vertical" Width="200" Grid.Column="0" Margin="5 0" HorizontalAlignment="Center">
                 <!-- menu tray -->
-                <Border Width="140" Background="WhiteSmoke" BorderBrush="Black" BorderThickness="1">
+                <Border Width="175" Background="WhiteSmoke" BorderBrush="Black" BorderThickness="1">
                     <!-- the toolbar to replace the old menu -->
                     <ToolBarTray>
                         <ToolBar Band="1" BandIndex="1" ToolBarTray.IsLocked="True" Loaded="ToolBar_Loaded">
@@ -37,6 +37,28 @@
                             <Button ToolTip="Redo Move" x:Name="RedoBtn" Width="23" Click="RedoBtn_Click" IsEnabled="false">
                                 <Image x:Name="RedoImg" Source="pack://application:,,,/assets/images/redo_grey.png"/>
                             </Button>
+                            <Separator/>
+                            <!--
+                            
+                                    <Button>
+                                        <Image Source="pack://application:,,,/assets/images/perspective.png"/>
+                                    </Button>
+                            -->
+                            <Button ToolTip="Perspective" Click="PerMenuButton_Click">
+                                <Image Source="pack://application:,,,/assets/images/perspective.png"/>
+                            </Button>
+                            <Menu>
+                                <MenuItem x:Name="PerMenu" IsEnabled="false">
+                                    <MenuItem IsEnabled="false">
+                                        <MenuItem.Header>
+                                            <TextBlock Text="Perspective" Foreground="Black" TextDecorations="Underline"/>
+                                        </MenuItem.Header>
+                                    </MenuItem>
+                                    <MenuItem x:Name="PerDefault" Header="Default" Click="Perspective_Changed"/>
+                                    <MenuItem x:Name="PerWhite" Header="White" Click="Perspective_Changed"/>
+                                    <MenuItem x:Name="PerBlack" Header="Black" Click="Perspective_Changed"/>
+                                </MenuItem>
+                            </Menu>
                         </ToolBar>
                     </ToolBarTray>
                 </Border>
