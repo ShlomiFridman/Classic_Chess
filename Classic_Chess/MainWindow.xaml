@@ -69,7 +69,7 @@
                 <TextBlock Text="Graveyard" FontSize="15" TextDecorations="Underline" HorizontalAlignment="Center"/>
                 <WrapPanel x:Name="graveyardPanel" Height="500" Orientation="Horizontal"/>
             </StackPanel>
-            <Border BorderThickness="6" BorderBrush="DarkSlateGray" MinWidth="497" Height="500" Margin="3" Grid.Column="1">
+            <Border BorderThickness="6" BorderBrush="DarkSlateGray" Height="570" Margin="3" Grid.Column="1">
                 <StackPanel Background="SaddleBrown">
                     <Grid x:Name="BoardGrid" Visibility="Visible">
                     </Grid>

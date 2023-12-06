@@ -31,9 +31,10 @@ namespace Classic_Chess.MyClasses.Pieces
                 after = getAfterPos(this.movesOffsets[0]);
                 pieceAt = board.getPieceAt(after);
                 // if the space is empty, than the move is legal
-                moves.Add(new Move(this.pos, after, this, pieceAt));
+                if (!isEnemy(pieceAt))
+                    moves.Add(new Move(this.pos, after, this, pieceAt));
                 // check second move option if the pawn didn't moved from his starting position
-                if ((color == Color.Black && pos.y == 1) || (color == Color.White && pos.y == 6))
+                if (pieceAt == null && (color == Color.Black && pos.y == 1) || (color == Color.White && pos.y == 6))
                 {
                     after = getAfterPos(new Coords(0, 2 * colorMul));
                     pieceAt = board.getPieceAt(after);

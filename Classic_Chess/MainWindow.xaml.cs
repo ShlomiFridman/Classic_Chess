@@ -27,6 +27,9 @@ namespace Classic_Chess
         public MainWindow()
         {
             int i,j;
+            Border border;
+            ChessPiece piece;
+            StackPanel sPanel, fsPanel;
             // load saved pers value
             this.perspective = Properties.Settings.Default.Perspective;
             // init game board
@@ -35,6 +38,24 @@ namespace Classic_Chess
             // init window elements
             InitializeComponent();
             // build default grid
+            // first coords panels defs
+            BoardGrid.RowDefinitions.Add(new RowDefinition()
+            {
+                Height = new GridLength(31)
+            });
+            BoardGrid.ColumnDefinitions.Add(new ColumnDefinition()
+            {
+                Width = new GridLength(31)
+            });
+            FlippedBoardGrid.RowDefinitions.Add(new RowDefinition()
+            {
+                Height = new GridLength(31)
+            });
+            FlippedBoardGrid.ColumnDefinitions.Add(new ColumnDefinition()
+            {
+                Width = new GridLength(31)
+            });
+            // the board defs
             for (i = 0; i < 8; i++)
             {
                 BoardGrid.RowDefinitions.Add(new RowDefinition()
@@ -54,28 +75,86 @@ namespace Classic_Chess
                     Width = new GridLength(62)
                 });
             }
+            // second coords panels defs
+            BoardGrid.RowDefinitions.Add(new RowDefinition()
+            {
+                Height = new GridLength(31)
+            });
+            BoardGrid.ColumnDefinitions.Add(new ColumnDefinition()
+            {
+                Width = new GridLength(31)
+            });
+            FlippedBoardGrid.RowDefinitions.Add(new RowDefinition()
+            {
+                Height = new GridLength(31)
+            });
+            FlippedBoardGrid.ColumnDefinitions.Add(new ColumnDefinition()
+            {
+                Width = new GridLength(31)
+            });
+            // build the panels themselves
             for (i = 0; i < 8; i++)
                 for (j = 0; j < 8; j++) 
                 {
-                    var piece = gameBoard.getPieceAt(new Coords(j, i));
+                    piece = gameBoard.getPieceAt(new Coords(j, i));
                     // create the reguler panel
-                    var panel = createStackPanel(new Coords(j, i));
+                    sPanel = createStackPanel(new Coords(j, i));
                     // add the click event
-                    panel.MouseLeftButtonUp += panelMouseLeftButtonUp;
+                    sPanel.MouseLeftButtonUp += panelMouseLeftButtonUp;
                     // add the panel to the board
-                    BoardGrid.Children.Add(panel);
+                    BoardGrid.Children.Add(sPanel);
                     // create the flipped panel
-                    var flippedPanel = createStackPanel(new Coords(j, (7-i)%8));
+                    fsPanel = createStackPanel(new Coords(j, (7-i)%8));
                     // set tag to the regular panel
-                    flippedPanel.Tag = panel;
+                    fsPanel.Tag = sPanel;
                     // add the flipped click event
-                    flippedPanel.MouseLeftButtonUp += flippedPanelMouseLeftButtonUp;
+                    fsPanel.MouseLeftButtonUp += flippedPanelMouseLeftButtonUp;
                     // add the fpanel to the fboard
-                    FlippedBoardGrid.Children.Add(flippedPanel);
+                    FlippedBoardGrid.Children.Add(fsPanel);
                     // add image, if needed
                     if (piece != null)
-                        setImage(panel, piece, true);
+                        setImage(sPanel, piece, true);
                 }
+            // the grid coords panels
+            for (i = 0; i < 8; i++)
+            {
+                // the normal board
+                border = createTextPanel(new Coords(i + 1, 0), Convert.ToChar('A' + i).ToString(), true, false);
+                BoardGrid.Children.Add(border);
+                border = createTextPanel(new Coords(i + 1, 9), Convert.ToChar('A' + i).ToString(), false, true);
+                BoardGrid.Children.Add(border);
+                border = createTextPanel(new Coords(0, 8 - i), Convert.ToChar('1' + i).ToString(), false, true);
+                BoardGrid.Children.Add(border);
+                border = createTextPanel(new Coords(9, 8 - i), Convert.ToChar('1' + i).ToString(), true, false);
+                BoardGrid.Children.Add(border);
+                // the flipped board
+                border = createTextPanel(new Coords(i + 1, 0), Convert.ToChar('A' + i).ToString(), true, true);
+                FlippedBoardGrid.Children.Add(border);
+                border = createTextPanel(new Coords(i + 1, 9), Convert.ToChar('A' + i).ToString(), false, false);
+                FlippedBoardGrid.Children.Add(border);
+                border = createTextPanel(new Coords(0, i + 1), Convert.ToChar('1' + i).ToString(), false, false);
+                FlippedBoardGrid.Children.Add(border);
+                border = createTextPanel(new Coords(9, i + 1), Convert.ToChar('1' + i).ToString(), true, true);
+                FlippedBoardGrid.Children.Add(border);
+            }
+            // set the coners panels
+            // the normal board
+            border = createTextPanel(new Coords(0, 0), "♕", true, false);
+            BoardGrid.Children.Add(border);
+            border = createTextPanel(new Coords(9, 0), "♔", true, false);
+            BoardGrid.Children.Add(border);
+            border = createTextPanel(new Coords(0, 9), "♕", false, true);
+            BoardGrid.Children.Add(border);
+            border = createTextPanel(new Coords(9, 9), "♔", false, true);
+            BoardGrid.Children.Add(border);
+            border = createTextPanel(new Coords(0, 0), "♕", true, true);
+            FlippedBoardGrid.Children.Add(border);
+            border = createTextPanel(new Coords(9, 0), "♔", true, true);
+            FlippedBoardGrid.Children.Add(border);
+            border = createTextPanel(new Coords(0, 9), "♕", false, false);
+            FlippedBoardGrid.Children.Add(border);
+            border = createTextPanel(new Coords(9, 9), "♔", false, false);
+            FlippedBoardGrid.Children.Add(border);
             // set the perspective options tags
             PerDefault.Tag = 0;
             PerWhite.Tag = 1;
@@ -218,12 +297,12 @@ namespace Classic_Chess
 
         private StackPanel getPanel(Coords pos)
         {
-            return (StackPanel) BoardGrid.Children.Cast<UIElement>().First((el) => (Grid.GetRow(el) == pos.y && Grid.GetColumn(el) == pos.x));
+            return (StackPanel) BoardGrid.Children.Cast<UIElement>().First((el) => (Grid.GetRow(el) == pos.y+1 && Grid.GetColumn(el) == pos.x+1));
         }
 
         private StackPanel getFPanel(Coords pos)
         {
-            return (StackPanel)FlippedBoardGrid.Children.Cast<UIElement>().First((el) => ((7 - Grid.GetRow(el)%8) == pos.y && Grid.GetColumn(el) == pos.x));
+            return (StackPanel)FlippedBoardGrid.Children.Cast<UIElement>().First((el) => ((7 - pos.y%8) +1== Grid.GetRow(el) && Grid.GetColumn(el) == pos.x+1));
         }
 
         private Coords getPos(Object obj)
@@ -259,6 +338,7 @@ namespace Classic_Chess
 
         private void resetBoard()
         {
+            int col, row;
             // clear board
             foreach (var kv in gameBoard.getActivePieces())
             {
@@ -267,6 +347,10 @@ namespace Classic_Chess
             // clear flipped board, O(1)
             foreach (var child in FlippedBoardGrid.Children)
             {
+                col = Grid.GetColumn((UIElement)child);
+                row = Grid.GetRow((UIElement)child);
+                if (!(col >= 1 && col <= 8 && row >= 1 && row <= 8))
+                    continue;
                 StackPanel fp = (StackPanel)child;
                 fp.Children.Clear();
             }
@@ -458,13 +542,40 @@ namespace Classic_Chess
         {
             var stackPanel = new StackPanel();
             int i = pos.y, j = pos.x;
-            Grid.SetRow(stackPanel, i);
-            Grid.SetColumn(stackPanel, j);
+            Grid.SetRow(stackPanel, i+1);
+            Grid.SetColumn(stackPanel, j+1);
             stackPanel.Background = ((i + j) % 2 == 0) ? Brushes.GhostWhite : Brushes.DarkGray;
             stackPanel.Tag = pos;
             stackPanel.Margin = new Thickness(1);
             stackPanel.MinHeight = stackPanel.MinWidth = 50;
             return stackPanel;
+        }
+
+        private Border createTextPanel(Coords pos, string text, bool isFlipped, bool isWhite)
+        {
+            var border = new Border();
+            var tb = new TextBlock();
+            int i = pos.y, j = pos.x;
+            Grid.SetRow(border, i);
+            Grid.SetColumn(border, j);
+            border.Background = Brushes.LightSlateGray;
+            border.Tag = pos;
+            border.Margin = new Thickness(1);
+            tb.Text = text;
+            tb.FontSize = 15;
+            tb.FontWeight = FontWeights.Light;
+            tb.Foreground = (isWhite)? Brushes.White : Brushes.Black;
+            tb.TextAlignment = TextAlignment.Center;
+            tb.VerticalAlignment = VerticalAlignment.Center;
+            tb.TextWrapping = TextWrapping.Wrap;
+            // flip text if needed
+            if (isFlipped)
+            {
+                tb.LayoutTransform = new RotateTransform(-180);
+
+            }
+            border.Child = tb;
+            return border;
         }
 
         /// <summary>
